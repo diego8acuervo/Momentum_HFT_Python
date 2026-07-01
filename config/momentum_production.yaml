@@ -1,0 +1,92 @@
+# Momentum production configuration — REFERENCE ONLY
+#
+# NOTE: src/AQM_Momentum_Live.py has no --config flag today; it is driven
+# entirely by CLI arguments. This file is NOT loaded by any code path.
+# It documents the intended production parameter set — translate the values
+# below into CLI flags (see the `cli_equivalent` block at the bottom) when
+# building the Dockerfile CMD or a manual launch command.
+#
+# See Momentum_Strategy.md §11.1 for the full CLI reference this mirrors.
+
+strategy: momentum
+
+account: binance_momentum   # account_manager.py preset — see Multi_Account_Manager.md
+exchange: binance
+capital: 100000
+
+signal:
+  variant: turtle            # 'turtle' or 'tanh'
+  short_window: 5
+  long_window: 30
+  max_weight: 0.10
+  stop_loss_pct: -0.15
+  atr_period: 20              # hardcoded in MomentumStrategy, not CLI-configurable today
+
+rebalance:
+  rebalance_hour_utc: 0
+  min_rebalance_threshold: 0.005
+
+execution:
+  batch_n: 3
+  batch_interval_s: 600
+  limit_offset_bps: 2
+
+universe:
+  tokens:
+    - AAVE
+    - AIXBT
+    - AVAX
+    - BCH
+    - BNB
+    - BTC
+    - COMP
+    - DOGE
+    - DOT
+    - DYDX
+    - EIGEN
+    - ENA
+    - ETH
+    - ETHFI
+    - FORM
+    - INJ
+    - JUP
+    - LTC
+    - NEAR
+    - PNUT
+    - RAY
+    - SOL
+    - SUI
+    - TRX
+    - UNI
+    - WIF
+
+state_file: live_state_momentum.json
+interval: "1d"
+
+gcp:
+  project_id: "aqm-trading-prod"      # same GCP project as MR (shared per deploy decision)
+  bigquery_dataset: "trading"          # reuses MR's dataset; new tables: momentum_weights, momentum_rebalances, momentum_pnl_snapshots, momentum_alerts
+  secret_prefix: "aqm-momentum"        # separate Secret Manager namespace from aqm-trading-*
+  region: "europe-west1"
+
+# --- cli_equivalent -------------------------------------------------------
+# python src/AQM_Momentum_Live.py \
+#   --tokens AAVE,AIXBT,AVAX,BCH,BNB,BTC,COMP,DOGE,DOT,DYDX,EIGEN,ENA,ETH,ETHFI,FORM,INJ,JUP,LTC,NEAR,PNUT,RAY,SOL,SUI,TRX,UNI,WIF \
+#   --capital 100000 \
+#   --variant turtle \
+#   --short-window 5 \
+#   --long-window 30 \
+#   --max-weight 0.10 \
+#   --stop-loss -0.15 \
+#   --rebalance-utc 0 \
+#   --min-rebalance 0.005 \
+#   --batch-n 3 \
+#   --batch-interval 600 \
+#   --limit-offset-bps 2 \
+#   --exchange binance \
+#   --account binance_momentum \
+#   --state-file live_state_momentum.json \
+#   --interval 1d \
+#   --gcp \
+#   --gcp-project aqm-trading-prod \
+#   --gcp-dataset trading

@@ -1,0 +1,45 @@
+# Output files
+outputs/
+src/outputs/
+
+# CSV data/log files
+*.csv
+
+# Python cache
+__pycache__/
+src/__pycache__/
+*.pyc
+*.pyo
+
+# Environment / secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+PairsTrading/
+.venv/
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude config (keep project/user command references)
+.claude/*
+!.claude/project/
+!.claude/user/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Live trading logs and state snapshots (runtime files, not source)
+notebooks/log_*.txt
+notebooks/live_state*.json
+
+# ZIP archives
+*.zip
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate*
+infra/.terraform.lock.hcl
+terraform.tfvars

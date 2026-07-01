@@ -1,0 +1,49 @@
+steps:
+  # Resolve tag: use SHORT_SHA from trigger, or _TAG override for manual builds
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: tag-latest
+    args:
+      - 'tag'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:latest'
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-latest
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:latest'
+
+  # Deploy to GCE
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: deploy
+    args:
+      - 'compute'
+      - 'instances'
+      - 'update-container'
+      - '${_VM_NAME}'
+      - '--zone=${_ZONE}'
+      - '--container-image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}'
+
+substitutions:
+  _REGION: europe-west1
+  _REPO: aqm-trading
+  _IMAGE: momentum-hft
+  _VM_NAME: aqm-momentum-vm
+  _ZONE: europe-west1-b
+  _TAG: ${SHORT_SHA}
+
+options:
+  logging: CLOUD_LOGGING_ONLY
